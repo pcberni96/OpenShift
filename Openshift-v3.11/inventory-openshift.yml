@@ -1,1 +1,62 @@
+# Inventory OpenShift-Ansible 
+# Declaración Global 
+
+# Creación del grupo OSEv3 que contiene al maestro, nodo, etcd
+[OSEv3:children]
+masters
+nodes
+etcd
+
+# Configuración variables comunes para todos los hosts OSEv3
+[OSEv3:vars]
+
+# Esta variable permitira establecer el usuario SSH que utilizara el instalador. Este usuario debe permitir la autenticación basada en SSH sin requerir una contraseña
+ansible_ssh_user=root
+
+# Si la variable ansible_ssh_usr no es root, entonces esta variable se establece como 'true' y el usuario debe estar configurado para sudo sin contraseña
+ansible_become=true 
+
+# Despliegue OpenShift
+openshift_deployment_type=openshift-enterprise 
+
+# Especificar la versión de OpenShift a instalar
+openshift_release=v3.11
+
+
+# Establecer imagen de registro
+oreg_url=registry.redhat.io/openshift3/ose-${component}:${version}
+oreg_auth_user='pbernal@compusoluciones.com'
+oreg_auth_password='Alejandra+240496'
+
+# Creación del cluster
+openshift_master_cluster_hostname=master01-openshift.server
+openshift_master_default_subdomain=myapps.server
+openshift_master_api_port=443
+openshift_master_console_port=443
+
+
+# Set Domain for Apps
+openshift_master_default_subdomain=server.apps
+
+# Habilitar el metodo de autenticación, por defecto permite todas las autenticaciones
+openshift_master_identity_providers=[{'name': 'httpasswd_auth', 'login': 'true', 'challenge': 'true', 'kind': 'HTPasswdPasswordIdentityProvider'}]
+
+openshift_docker_insecure_registries=172.30.0.0/16
+
+# Deshabilitar check de disco y memoria
+openshift_disable_check=disk_availability,memory_availability
+
+# host group para masters
+[masters]
+master01.server
+
+# host group for etcd
+[etcd]
+master01.server
+
+# Grupo host para nodos, incluyendo la región
+[nodes]
+master01.server openshift_node_group_name='node-config-master'
+node01.server openshift_node_group_name='node-config-compute'
+node02.server openshift_node_group_name='node-config-infra'
 
