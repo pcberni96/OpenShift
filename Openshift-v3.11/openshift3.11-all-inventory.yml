@@ -1,0 +1,37 @@
+###################################################
+### Inventario Ansible para desplegat OpenShift ###
+###################################################
+
+## Creamos el grupo que contendra los nodos 
+## Que seran habilitados para OpenShift
+
+[OSEv3:children]
+masters
+nodes
+etcd 
+lb
+nfs
+glusters
+
+## Declaramos las variables globales
+## Para la configuración
+
+## Establecemos el usuario SSH que realizara la configuración, esta autenticación requiere una contraseña. Si usamos la autentocacion basada en llave, el agente SSH gestionara el acceso
+ansible_ssh_user = root
+## Si ansible_user no es root, ansible_become debe ser establecido como true, el usuario establecido debe ser configurado para usar sudo sin contraseña
+ansible_become = true
+## Establecer el tipo de despliegue a realizar. Los valores validos son "origin" y "openshift-enterprise"
+openshift_deployment_tipe = origin
+## Establecer la version generica a instalar de OpenShift. Esto es usado principalmente durante la instalación, despues solo confiaremos en la version que se ejecuta en el primer maestro. Esto es muy util para instalaciones basadas en contenedores donde es la estiqueta realmente utilizada para la configuracion del cluster. En instalaciones rpm solo verificamos que la version concida con los los repositorios configurados
+openshift_release=v3.11
+## Subdominio predeterminado para usar en rutas expuestas, se debe tener un wildcard dns  para el *.subdominio que apuntara a tu router que se ejecutara en los nods de infraestructura##
+openshift_master_default_subdomain = subdomain.domain
+
+## Variable que anula el nombre del cluster, que por defecto es el hostname del master ##
+openshift_master_cluster_hostname = openshift-cluster.domain
+
+## Variable que anula el nombre del cluster que por defecto es el hostname del master, si se esta usando un balanceador de cargas externo, especificar la direccion del balanceador externo ##
+
+## Variables adicionales de configuracion ##
+
+## Nivel de 
