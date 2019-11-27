@@ -2,7 +2,7 @@
 ### Inventario Ansible para desplegat OpenShift ###
 ###################################################
 
-## Creamos el grupo que contendra los nodos 
+## Creamos el grupo que contendra los nodos y maestros
 ## Que seran habilitados para OpenShift
 
 [OSEv3:children]
@@ -15,23 +15,133 @@ glusters
 
 ## Declaramos las variables globales
 ## Para la configuración
+[OSEv3:vars]
 
-## Establecemos el usuario SSH que realizara la configuración, esta autenticación requiere una contraseña. Si usamos la autentocacion basada en llave, el agente SSH gestionara el acceso
-ansible_ssh_user = root
-## Si ansible_user no es root, ansible_become debe ser establecido como true, el usuario establecido debe ser configurado para usar sudo sin contraseña
-ansible_become = true
-## Establecer el tipo de despliegue a realizar. Los valores validos son "origin" y "openshift-enterprise"
-openshift_deployment_tipe = origin
-## Establecer la version generica a instalar de OpenShift. Esto es usado principalmente durante la instalación, despues solo confiaremos en la version que se ejecuta en el primer maestro. Esto es muy util para instalaciones basadas en contenedores donde es la estiqueta realmente utilizada para la configuracion del cluster. En instalaciones rpm solo verificamos que la version concida con los los repositorios configurados
+#############################################
+# Variables Ansible
+#############################################
+
+## Establecemos el usuario SSH que realizara la configuración, 
+## esta autenticación requiere una contraseña. Si usamos la autentocacion basada en llave, 
+## el agente SSH gestionara el acceso
+ansible_ssh_user=root
+
+## Si ansible_user no es root, ansible_become debe ser establecido como true, 
+#el usuario establecido debe ser configurado para usar sudo sin contraseña
+ansible_become=true
+
+##############################################
+# OpenShift Variables Basicas
+##############################################
+
+## Establecer el tipo de despliegue a realizar. 
+## Los valores validos son "origin" y "openshift-enterprise"
+openshift_deployment_tipe=openshift-enterprise
+
+## Deshabilitar la revision de requisitos de disco y memoria
+openshift_disable_check='disk_availability, memory_availability'
+
+## Establecer la version generica a instalar de OpenShift. 
+## Esto es usado principalmente durante la instalación, 
+## despues solo confiaremos en la version que se ejecuta en el primer maestro. 
+## Esto es muy util para instalaciones basadas en contenedores donde 
+## es la estiqueta realmente utilizada para la configuracion del cluster. 
+## En instalaciones rpm solo verificamos que la version concida con los los repositorios configurados
 openshift_release=v3.11
-## Subdominio predeterminado para usar en rutas expuestas, se debe tener un wildcard dns  para el *.subdominio que apuntara a tu router que se ejecutara en los nods de infraestructura##
+
+## Usa esta variable para especificar una etiqueta de imagen de comtenedor para instalar o configurar
+openshift_image_tag=v3.11.0
+
+## Usa esta variable para especificar una version RPM para instalar o configurar
+openshift_pkg_version = -3.11.0
+
+## Desplegar Operator Lifecycle Manager Tech Preview
+## Mas Información en https://coreos.com/blog/introducing-operator-framework
+## No recomendado para ambientes de produccion
+openshift_enable_olm = true
+
+## Habilita soprte para NFS para los componentes de la infraestructura
+openshift_enable_unsupported_configurations=true
+
+#####################################################
+## Habilitar CRI-O
+#####################################################
+
+openshift_use_crio=True
+openshift_use_crio_only=False
+openshift_crio_enable_docker_gc=True
+
+###################################################
+# OpenShift Locaciones de los Registros
+###################################################
+
+# Nota: Se requieren credenciales desde:
+
+## Establece una locacion para imagen alternativa.
+## Necesaria si no usas el registro default 'registry.redhat.io'
+oreg_url=registry.redhat.io/openshift3/ose-${component}:${version}
+
+## Para el registro de Red Hat, se requiere autentificarse
+oreg_auth_user='your_username'
+oreg_auth_password='your_password'
+
+## Para las imagenes de Operator Framework
+openshift_additional_registry_credentials=[{'host':'registry.connect.redhat.com','user':'<your_username','password':'<your_password','test_image':'mongodb/enterprise-operator:0.3.2'}]
+
+## Establece esta variable como True, si no usas
+## el registro predeterminado
+openshift_examples_modify_imagestreams=false
+
+## Permite agregar registros inseguros adicionales a los 
+## especificados en la configuracion de docker. Para estos registros
+## la capa de sockets seguros (SSL), no esta verificada. Se puede
+## configurar con el hostname o la ip.
+openshift_docker_hosted_registry_insecure=true
+
+##################################################
+## OpenShift Variables Master
+##################################################
+
+## Establece el puerto para acceder a la 
+## API OpenShift Container Platform
+openshift_master_api_port=443
+
+## Establece el puerto para acceder a la 
+## Web Console. Debe ser el mismo puerto que el del API
+openshift_master_console_port=443
+
+## Metodo para definir el HA cuando se despliegan multiples
+## masters, por defecto el valor es 'native'
+openshift_master_cluster_method=native
+
+## Subdominio predeterminado para usar en rutas expuestas, 
+## se debe tener un wildcard dns  para el *.subdominio que apuntara a tu router 
+## que se ejecutara en los nods de infraestructura
 openshift_master_default_subdomain = subdomain.domain
 
-## Variable que anula el nombre del cluster, que por defecto es el hostname del master ##
+## Variable que anula el nombre del cluster, 
+## que por defecto es el hostname del master 
 openshift_master_cluster_hostname = openshift-cluster.domain
 
-## Variable que anula el nombre del cluster que por defecto es el hostname del master, si se esta usando un balanceador de cargas externo, especificar la direccion del balanceador externo ##
+## Variable que anula el nombre del cluster que por defecto es el hostname del master, 
+## si se esta usando un balanceador de cargas externo, 
+## especificar la direccion del balanceador externo 
+openshift_master_cluster_public_hostname = openshift-ansible.public.example.com
 
-## Variables adicionales de configuracion ##
+########################################################
+## OpenShift Variables Network
+########################################################
 
-## Nivel de 
+## Esta Variable anula el bloque CIDR de la red SDN del cluster. Esta
+## esta es la red desde la cual se asignas las IP a los pods. Especifica un
+## bloque privado que no tengo conflicto con otros bloques de red
+osm_cluster_network_cidr=10.1.0.0/16
+
+## Esta variable configura la subred en donde los servicios seran creados
+## en la SDN de OpenShift Container Platform, eespecifique un bloque que
+## no entre en conflicto con otros bloques existentes 
+openshift_portal_net=172.30.0.0/16
+
+## Esta variable configura el complemento OpenShift SDN usara para
+#3 la red de POD
+os_sdn_network_plugin_name='redhat/openshift-ovs-networkpolicy'
