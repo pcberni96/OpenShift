@@ -142,6 +142,33 @@ osm_cluster_network_cidr=10.1.0.0/16
 ## no entre en conflicto con otros bloques existentes 
 openshift_portal_net=172.30.0.0/16
 
-## Esta variable configura el complemento OpenShift SDN usara para
-#3 la red de POD
+## Esta variable configura el complemento OpenShift SDN que se usara para
+## la red de PODs
 os_sdn_network_plugin_name='redhat/openshift-ovs-networkpolicy'
+
+##########################################################
+### Variables de Autenticacion
+##########################################################
+
+## httpasswd auth
+openshift_master_identity_providers=[{'name':'httpasswd_auth','login':'true','challenge':'true','kind':'HTPasswordIdentityProvider'}]
+## Definiendo usuarios htpasswd 
+openshift_master_htpasswd_users={'user1':'<pre-hashsed password>','user2':'<pre-hashsed password>'}
+## o apunta al archivo
+openshift_master_htpasswd_file=/etc/origin/master/htpasswd
+
+## Permitir todas las autenticaciones
+openshift_master_identity_provider=[{'name':'allow_all','login':'true','challenge':'true','kind':'AllowAllPasswordIdentityProvider'}]
+
+## Autenticación LDAP
+openshift_master_identity_provider=[{'name':'my_ldap_provider','challenge':'true','login':'true','kind':'LDAPPasswordIdentityProvider','attributes':{'id':['dn'],'email':['mail'],'name':['cn'],'preferredUsername':['uid']},'bindDN':'','bindPassword':'','insecure':'false','url':'ldap://ldap.example.com:389/ou=users,dc=example,dc=com?uid'}]
+#Configurando el Certificado ca LDAP
+openshift_master_ldap_ca=<ca text>
+# o el directorio del Certificado
+openshift_master_ldap_ca_file=<ruta para uso del archivo de certificado ca>
+## Variables disponibles para configurar certificados 
+## De otros proveedores
+openshift_master_openid_ca
+openshift_master_openind_ca_file
+openshift_master_request_header_ca
+openshift_master_request_header_ca_file 
