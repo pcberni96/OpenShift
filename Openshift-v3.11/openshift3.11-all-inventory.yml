@@ -171,4 +171,93 @@ openshift_master_ldap_ca_file=<ruta para uso del archivo de certificado ca>
 openshift_master_openid_ca
 openshift_master_openind_ca_file
 openshift_master_request_header_ca
-openshift_master_request_header_ca_file 
+openshift_master_request_header_ca_file
+
+###############################################
+## OpenShift Variables de Loggeo y Metricas
+############################################### 
+
+###########################
+## Metricas Prometheus 
+###########################
+
+## Despliega el Operador del Monitoreo del Cluster si es verdader
+## Esta variable se establece como 'true'
+openshift_cluster_monitoring_operator_install=true
+
+## Volumen reclamado del storage persistente para casa estancia
+## de Prometheus. Esta variable solo es aplicable si 
+## openshift_cluster_monitoring_operator_prometheus_storage_enabled
+## esta establecida como verdadera. Por defecto es de 50Gi
+openshift_cluster_monitoring_operator_prometheus_storage_capacity="50Gi"
+
+## Volumen Persistente reclamado para cada una de las instancias
+## de Alertmanager. Esta variable aplica si
+## openshift_cluster_operator_alermanager_storage_enabled esta esta
+## Esta establecida como  'true'. Por defecto son 2Gi
+openshift_cluster_monitoring_operator_alertmanager_storage_capacity="2Gi"
+
+## Establezca el selector de nodo existente deseado para colocar
+## los pods en nodos con etiquetas especificas, el valor por defecto
+## es 'node-role.kubernetes.io/infra=true'
+openshift_cluster_monitoring_operator_node_selector='node-role.kubernetes.io/infra=true.'
+
+
+## Habilitar el almacenamiento persistente para los datos de serie temporales
+## Se establce en 'false' por default
+openshift_cluster_monitoring_operator_prometheus_storage_enabled=false
+
+## Habilita el almacenamiento persistente para las 
+## notificaciones y silencios. Esta variable es 'false'
+openshift_cluster_monitoring_operator_alertmanager_storage_enabled=false
+
+## Si habilitaste la opcion 
+## openshift_cluster_monitoring_operator_prometheus_storage_enabled, establece
+## una clase de almacenamiento para asegurar que los pods estan configurados
+## Para usar PVC con storageclass. El valor por defecto es ninguno
+openshift_cluster_monitoring_operator_prometheus_storage_class_name=""
+
+## Si habilitaste la opcion 
+## openshift_cluster_monitoring_operator_prometheus_storage_enabled, establece
+## una clase de almacenamiento para asegurar que los pods estan configurados
+## Para usar PVC con storageclass. El valor por defecto es ninguno
+openshift_cluster_monitoring_operator_alertmanager_storage_class_name=""
+
+###############################
+## Metricas
+###############################
+
+## Despliega las metricas si es 'true', de lo contrario anula 
+## La implementacion
+openshift_metrics_install_metrics=true
+
+## El numero de días para almacenar las metricas
+## Antes de ser limpiadas
+openshift_metrics_duration=1
+
+## Grupo Host NFS
+## Al establecer las siguientes variables, se crea un volumen
+## NFS durante la instalacion del Clúster con la ruta 
+## '<nfs_directory>/<volume_name>' en el host del grupo de 
+## hosts [nfs]
+
+openshift_metrics_storage_kind=nfs
+openshift_metrics_storage_access_modes=['ReadWriteOnce']
+openshift_metrics_storage_nfs_directory=<nfs_directory>
+openshift_metrics_storage_nfs_options='*(rw,root_squash)'
+openshift_metrics_storage_volume_name=<volume_name>
+openshift_metrics_storage_volume_size=10Gi
+
+## Host Externo NFS
+## Para usar un volumen NFS externo ya debe existir uno en
+## '<nfs_directory>/<volume_name>' en el host de almacenamiento
+
+openshift_metrics_storage_kind=nfs
+openshift_metrics_storage_access_modes=['ReadWriteOnce']
+openshift_metrics_storage_nfs_directory=<nfs_directory>
+openshift_metrics_storage_volume_name=<volume_name>
+openshift_metrics_storage_volume_size=10Gi
+
+## Cassandra -- Almacenamiento Efimero(Para pruebas)
+
+## Use e
