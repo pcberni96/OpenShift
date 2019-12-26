@@ -181,7 +181,7 @@ openshift_master_request_header_ca_file
 ## Metricas Prometheus 
 ###########################
 
-## Despliega el Operador del Monitoreo del Cluster si es verdader
+## Despliega el Operador del Monitoreo del Cluster si es verdadero
 ## Esta variable se establece como 'true'
 openshift_cluster_monitoring_operator_install=true
 
@@ -258,6 +258,66 @@ openshift_metrics_storage_nfs_directory=<nfs_directory>
 openshift_metrics_storage_volume_name=<volume_name>
 openshift_metrics_storage_volume_size=10Gi
 
-## Cassandra -- Almacenamiento Efimero(Para pruebas)
+## Habilita configuraciones no soportadas, que no son 
+## compatibles con un entorno productivo 
+openshift_enable_unsupported_configurations=True
 
-## Use e
+## Cassandra -- Almacenamiento Efimero(Para pruebas) "emptyDir"
+## "pv" para volumenes persistentes, que deben crearse antes de
+## la instalación, o "dynamic" para volumenes persistentes dinamicos
+openshift_metrics_cassandra_storage_type=pv
+
+## El tamaño reclamado del volumen persistente por cada nodo de 
+## Cassandra
+openshift_metrics_cassandra_pvc_size=10Gi
+
+## Replicas para el contenedor de Cassandra
+openshift_metrics_cassandra_replicas=1
+
+## Limite para la memoria reservada a Cassandra
+## Este valor se puede ajustar mediante el script
+## De inicio basado en la memoria disponible del
+## nodo en el que esta programado
+openshift_metrics_cassandra_limits_memory=2Gi
+
+## El limite de CPU para el pod Cassandra "nm"
+## donde n es el numeto de milicores
+openshift_metrics_cassandra_limits_cpu=1000m
+
+## Establezcas el selector de nodos para asegurar 
+## Que los pods se coloquen en nodos con etiquetas 
+## Especificas 
+openshift_metrics_hakwlar_nodeselector={"node-role.kubernetes.io/ifra":"true"}
+openshift_metrics_cassandra_nodeselector={"node-role.kubernetes.io/ifra":"true"}
+openshift_metrics_heapster_nodeselector={"node-role.kubernetes.io/ifra":"true"}
+
+## Grafana
+
+## Establezcas el selector de nodos para asegurar 
+## Que los pods se coloquen en nodos con etiquetas 
+## Especificas 
+openshift_metrics_grafana_node_selector={"node-role.kubernetes.io/ifra":"true"}
+
+## Tipo de almacenamiento
+openshift_grafana_storage_type=PVC
+
+## Tamaño de almacenamiento Grafana
+openshift_grafana_pvc_size=2Gi
+
+openshift_grafana_node_exporter=true
+
+###########################################
+## Loggeo de Cluster Usando NFS 
+###########################################
+
+## Habilitar el loggeo de cluster, durante la 
+## instalacion
+openshift_logging_install_logging=true
+
+## Junto con openshift_logging_install_logging
+## Ambos se deben establecer en "true" o "false"
+openshift_logging_install_eventrouter=true
+
+## Establecer el nodo selector donde se ubicara el Pod 
+openshift_logging_es_nodeselector={"node-role.kubernetes.io/infra":"true"}
+
