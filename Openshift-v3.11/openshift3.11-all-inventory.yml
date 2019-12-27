@@ -254,6 +254,7 @@ openshift_metrics_storage_volume_size=10Gi
 
 openshift_metrics_storage_kind=nfs
 openshift_metrics_storage_access_modes=['ReadWriteOnce']
+openshift_metrics_storage_host=<hostname_nfs>
 openshift_metrics_storage_nfs_directory=<nfs_directory>
 openshift_metrics_storage_volume_name=<volume_name>
 openshift_metrics_storage_volume_size=10Gi
@@ -320,4 +321,64 @@ openshift_logging_install_eventrouter=true
 
 ## Establecer el nodo selector donde se ubicara el Pod 
 openshift_logging_es_nodeselector={"node-role.kubernetes.io/infra":"true"}
+
+## NFS Grupo Host
+## Establecer las variables para la creación del volumen
+## NFS que se creara durante la instalación, que tendra el
+## Siguiente path
+openshift_logging_storage_kind=nfs
+openshift_logging_storage_access_modes=['ReadWriteOnce']
+openshift_logging_storage_nfs_directory=<nfs_directory>
+openshift_logging_storage_nfs_options='*(rw,root_squash)'
+openshift_logging_storage_volume_name=<name_volume>
+openshift_logging_storage_volume_size=10Gi
+
+## Host Externo NFS
+## Para usar un volumen NFS externo ya debe existir uno en
+## '<nfs_directory>/<volume_name>' en el host de almacenamiento
+openshift_logging_storage_kind=nfs
+openshift_logging_storage_access_modes=['ReadWriteOnce']
+openshift_logging_storage_host=<hostname_nfs>
+openshift_logging_storage_nfs_directory=<nfs_directory>
+openshift_logging_storage_volume_name=<volume_name>
+openshift_logging_storage_volume_size=10Gi
+
+####################################################
+##### OpenShift Variables de Registro y Ruteo
+####################################################
+
+## Numero de replicas de Pod de router
+openshift_hosted_router_replicas=2
+
+## Numero de replicas de Pod de registro
+openshift_hosted_registry_replicas=1
+
+## Grupos NFS
+## Cuando las variables son establecidas, se crea un volumen NFS
+## Durante la instalación del Clúster con el siguiente paht 
+## '<nfs_directory>/<volume_name>' en el host establecido
+## en el grupos de hosts [nfs]
+openshift_hosted_registry_storage_kind=nfs 
+openshift_hosted_registry_storage_access_modes=['ReadWriteMany']
+openshift_hosted_registry_storage_nfs_directory=<nfs_directory>
+openshift_hosted_registry_storage_options='*(rw,root_squash)'
+openShift_hosted_registry_storage_volume_name=<volume_name>
+openshift_hosted_registry_storage_volume_size=10Gi
+
+## Host Externo NFS
+## Para usar un volumen NFS externo ya debe existir uno en
+## '<nfs_directory>/<volume_name>' en el host de almacenamiento
+openshift_hosted_registry_storage_kind=nfs
+openshift_hosted_registry_storage_access_modes=['ReadWriteMany']
+openshift_hosted_registry_storage_host=<hostname_nfs>
+openshift_hosted_registry_storage_nfs_directory=<nfs_directory>
+openshift_hosted_registry_storage_volume_name=<volume_name>
+openshift_hosted_registry_storage_volume_size=10Gi
+
+###############################################################
+##### OpenShift Variables del Servicio del Catalogo
+###############################################################
+
+## Habilitar la instalación del servicio de catalogo
+openshift_enable_service_catalog=true
 
