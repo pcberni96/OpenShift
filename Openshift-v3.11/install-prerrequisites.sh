@@ -22,7 +22,7 @@ for host in master01.server \
     done
 
 # Instalar los paquetes bases 
-yum install wget git net-tools bind-utils yum-utils iptables-services bridge-utils bash-completion kexec-tools sos psacct -y
+yum install wget git net-tools bind-utils yum-utils iptables-services bridge-utils bash-completion kexec-tools sos psacct vim -y
 yum update -y
 reboot
 
