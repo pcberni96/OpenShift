@@ -376,16 +376,18 @@ openshift_hosted_registry_storage_volume_name=<volume_name>
 openshift_hosted_registry_storage_volume_size=10Gi
 
 ###############################################################
-##### OpenShift Variables del Servicio del Catalogo
+##### OpenShift Variables del Servicio de Catalogo
 ###############################################################
 
 ## Habilitar la instalación del servicio de catalogo
 openshift_enable_service_catalog=true
 
+## Template Service Broker (TSB)
 ## Default true
 template_service_broker_install=true
 openshift_template_service_broker_namespaces=['openshift']
 
+## Ansible Service Broker (ASB)
 ## Default true
 ansible_service_broker_install=true
 ansible_service_broker_local_registry_whitelist=['.*-apb$']
