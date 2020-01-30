@@ -1,0 +1,165 @@
+###################################################
+### Inventario Ansible para desplegat OpenShift ###
+###################################################
+
+## Creamos el grupo que contendra los nodos y maestros
+## Que seran habilitados para OpenShift
+
+[OSEv3:children]
+masters
+nodes
+etcd 
+
+## Declaramos las variables globales
+## Para la configuración
+[OSEv3:vars]
+
+#############################################
+# Variables Ansible
+#############################################
+
+## Establecemos el usuario SSH que realizara la configuración, 
+## esta autenticación requiere una contraseña. Si usamos la autentocacion basada en llave, 
+## el agente SSH gestionara el acceso
+ansible_ssh_user=root
+
+## Si ansible_user no es root, ansible_become debe ser establecido como true, 
+#el usuario establecido debe ser configurado para usar sudo sin contraseña
+ansible_become=true
+
+##############################################
+# OpenShift Variables Basicas
+##############################################
+
+## Establecer el tipo de despliegue a realizar. 
+## Los valores validos son "origin" y "openshift-enterprise"
+openshift_deployment_tipe=openshift-enterprise
+
+## Deshabilitar la revision de requisitos de disco y memoria
+openshift_disable_check='disk_availability, memory_availability'
+
+## Establecer la version generica a instalar de OpenShift. 
+## Esto es usado principalmente durante la instalación, 
+## despues solo confiaremos en la version que se ejecuta en el primer maestro. 
+## Esto es muy util para instalaciones basadas en contenedores donde 
+## es la estiqueta realmente utilizada para la configuracion del cluster. 
+## En instalaciones rpm solo verificamos que la version concida con los los repositorios configurados
+openshift_release=v3.11
+
+## Habilita soprte para NFS para los componentes de la infraestructura
+openshift_enable_unsupported_configurations=true
+
+###################################################
+# OpenShift Locaciones de los Registros
+###################################################
+
+# Nota: Se requieren credenciales desde:
+
+## Establece una locacion para imagen alternativa.
+## Necesaria si no usas el registro default 'registry.redhat.io'
+oreg_url=registry.redhat.io/openshift3/ose-${component}:${version}
+
+## Para el registro de Red Hat, se requiere autentificarse
+oreg_auth_user='pbernal@compusoluciones.com'
+oreg_auth_password='Alejandra+240496'
+
+## Permite agregar registros inseguros adicionales a los 
+## especificados en la configuracion de docker. Para estos registros
+## la capa de sockets seguros (SSL), no esta verificada. Se puede
+## configurar con el hostname o la ip.
+openshift_docker_hosted_registry_insecure=true
+
+##################################################
+## OpenShift Variables Master
+##################################################
+
+## Establece el puerto para acceder a la 
+## API OpenShift Container Platform
+openshift_master_api_port=443
+
+## Establece el puerto para acceder a la 
+## Web Console. Debe ser el mismo puerto que el del API
+openshift_master_console_port=443
+
+## Subdominio predeterminado para usar en rutas expuestas, 
+## se debe tener un wildcard dns  para el *.subdominio que apuntara a tu router 
+## que se ejecutara en los nods de infraestructura
+openshift_master_default_subdomain=apps.example.lab
+
+########################################################
+## OpenShift Variables Network
+########################################################
+
+## Esta Variable anula el bloque CIDR de la red SDN del cluster. Esta
+## esta es la red desde la cual se asignas las IP a los pods. Especifica un
+## bloque privado que no tengo conflicto con otros bloques de red
+osm_cluster_network_cidr=10.1.0.0/16
+
+## Esta variable configura la subred en donde los servicios seran creados
+## en la SDN de OpenShift Container Platform, especifique un bloque que
+## no entre en conflicto con otros bloques existentes 
+openshift_portal_net=172.40.0.0/16
+
+## Esta variable configura el complemento OpenShift SDN que se usara para
+## la red de PODs
+os_sdn_network_plugin_name='redhat/openshift-ovs-networkpolicy'
+
+##########################################################
+### Variables de Autenticacion
+##########################################################
+
+## httpasswd auth
+openshift_master_identity_providers=[{'name': 'httpasswd_auth', 'login': 'true', 'challenge': 'true', 'kind': 'HTPasswdPasswordIdentityProvider'}]
+
+###############################
+## Metricas
+###############################
+
+## Despliega las metricas si es 'true', de lo contrario anula 
+## La implementacion
+openshift_metrics_install_metrics=true
+
+## El numero de días para almacenar las metricas
+## Antes de ser limpiadas
+openshift_metrics_duration=1
+
+## Host Externo NFS
+## Para usar un volumen NFS externo ya debe existir uno en
+## '<nfs_directory>/<volume_name>' en el host de almacenamiento
+
+openshift_metrics_storage_kind=nfs
+openshift_metrics_storage_access_modes=['ReadWriteOnce']
+openshift_metrics_storage_host=storage-shared.example.lab
+openshift_metrics_storage_nfs_directory=/exports
+openshift_metrics_storage_volume_name=metricas
+openshift_metrics_storage_volume_size=10Gi
+
+
+####################################################
+##### OpenShift Variables de Registro y Ruteo
+####################################################
+
+## Host Externo NFS
+## Para usar un volumen NFS externo ya debe existir uno en
+## '<nfs_directory>/<volume_name>' en el host de almacenamiento
+openshift_hosted_registry_storage_kind=nfs
+openshift_hosted_registry_storage_access_modes=['ReadWriteMany']
+openshift_hosted_registry_storage_host=storage-shared.example.lab
+openshift_hosted_registry_storage_nfs_directory=/exports
+openshift_hosted_registry_storage_volume_name=registros
+openshift_hosted_registry_storage_volume_size=10Gi
+
+# host group para masters
+[masters]
+master01.example.lab
+
+# host group for etcd
+[etcd]
+master01.example.lab
+
+# Grupo host para nodos, incluyendo la región
+[nodes]
+master01.example.lab openshift_node_group_name='node-config-master'
+node01.example.lab openshift_node_group_name='node-config-compute'
+node02.example.lab openshift_node_group_name='node-config-infra'
+
